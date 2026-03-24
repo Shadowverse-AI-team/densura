@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>デンスラ算 - シャドバWB計算ツール</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div class="container">
+    <header>
+      <h1>デンスラ算</h1>
+      <p class="subtitle">x + y + z = n となる組み合わせの確率計算</p>
+    </header>
+
+    <section class="input-section">
+      <label for="n-input">n の値</label>
+      <input id="n-input" type="number" min="0" max="30" value="4" />
+      <span id="total-info"></span>
+    </section>
+
+    <div class="tabs">
+      <button class="tab active" data-tab="all">全パターンの確率</button>
+      <button class="tab" data-tab="cond">条件付き確率</button>
+    </div>
+
+    <!-- 全パターンタブ -->
+    <section id="tab-all" class="tab-content">
+      <div id="all-result"></div>
+    </section>
+
+    <!-- 条件付き確率タブ -->
+    <section id="tab-cond" class="tab-content hidden">
+      <p class="hint">確率を求めたい変数にチェックして閾値を入力してください（AND条件）</p>
+      <div class="cond-row">
+        <label><input type="checkbox" id="chk-x" /> x ≥ <input type="number" id="val-x" class="cond-val" min="0" value="0" disabled /></label>
+      </div>
+      <div class="cond-row">
+        <label><input type="checkbox" id="chk-y" /> y ≥ <input type="number" id="val-y" class="cond-val" min="0" value="0" disabled /></label>
+      </div>
+      <div class="cond-row">
+        <label><input type="checkbox" id="chk-z" /> z ≥ <input type="number" id="val-z" class="cond-val" min="0" value="0" disabled /></label>
+      </div>
+      <div id="cond-result" class="cond-result"></div>
+    </section>
+  </div>
+
+  <script type="module" src="app.js"></script>
+</body>
+</html>
