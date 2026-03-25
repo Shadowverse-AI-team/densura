@@ -3,6 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self'; style-src 'self';" />
   <title>デンスラ算 - シャドバWB計算ツール</title>
   <link rel="stylesheet" href="style.css" />
 </head>
@@ -19,18 +20,18 @@
       <span id="total-info"></span>
     </section>
 
-    <div class="tabs">
-      <button class="tab active" data-tab="all">全パターンの確率</button>
-      <button class="tab" data-tab="cond">条件付き確率</button>
+    <div class="tabs" role="tablist">
+      <button class="tab active" data-tab="all" role="tab" aria-selected="true" aria-controls="tab-all">全パターンの確率</button>
+      <button class="tab" data-tab="cond" role="tab" aria-selected="false" aria-controls="tab-cond">条件付き確率</button>
     </div>
 
     <!-- 全パターンタブ -->
-    <section id="tab-all" class="tab-content">
-      <div id="all-result"></div>
+    <section id="tab-all" class="tab-content" role="tabpanel">
+      <div id="all-result" aria-live="polite"></div>
     </section>
 
     <!-- 条件付き確率タブ -->
-    <section id="tab-cond" class="tab-content hidden">
+    <section id="tab-cond" class="tab-content hidden" role="tabpanel">
       <p class="hint">確率を求めたい変数にチェックして閾値を入力してください（AND条件）</p>
       <div class="cond-row">
         <label><input type="checkbox" id="chk-x" /> x ≥ <input type="number" id="val-x" class="cond-val" min="0" value="0" disabled /></label>
@@ -41,7 +42,7 @@
       <div class="cond-row">
         <label><input type="checkbox" id="chk-z" /> z ≥ <input type="number" id="val-z" class="cond-val" min="0" value="0" disabled /></label>
       </div>
-      <div id="cond-result" class="cond-result"></div>
+      <div id="cond-result" class="cond-result" aria-live="polite"></div>
     </section>
   </div>
 
