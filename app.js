@@ -5,7 +5,7 @@ import {
   getConditionalProbability,
 } from './calculator.js'
 
-const MAX_N = 30
+const MAX_N = 100
 const BAR_SCALE = 160 // px: 最大バー幅
 
 const nInput = document.getElementById('n-input')
