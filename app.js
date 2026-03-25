@@ -34,7 +34,7 @@ document.querySelectorAll('.tab').forEach(tab => {
   })
 })
 
-// チェックボックスで入力欄の有効/無効
+// チェックボックスで入力欄の有効/無効、変更のたびに即計算
 ;[[chkX, valX], [chkY, valY], [chkZ, valZ]].forEach(([chk, val]) => {
   chk.addEventListener('change', () => {
     val.disabled = !chk.checked
@@ -48,10 +48,6 @@ function getN() {
   return isNaN(v) || v < 0 ? 0 : Math.min(v, MAX_N)
 }
 
-function setText(el, text) {
-  el.textContent = text
-}
-
 function makeEl(tag, { cls, text, style } = {}) {
   const el = document.createElement(tag)
   if (cls) el.className = cls
@@ -60,14 +56,16 @@ function makeEl(tag, { cls, text, style } = {}) {
   return el
 }
 
-function renderAll(n, combos) {
+function renderAll() {
+  const n = getN()
+  const combos = getAllCombinations(n)
   const total = getTotalCombinations(n)
   const maxProb = combos.reduce(
     (max, [x, y, z]) => Math.max(max, getCombinationProbability(n, x, y, z)),
     0
   )
 
-  setText(totalInfo, `総パターン数: ${total} 通り`)
+  totalInfo.textContent = `総パターン数: ${total} 通り`
 
   // summary
   const summaryBox = makeEl('div', { cls: 'summary-box' })
@@ -106,7 +104,9 @@ function renderAll(n, combos) {
   allResult.replaceChildren(summaryBox, tableWrapper)
 }
 
-function updateCond(n, combos) {
+function updateCond() {
+  const n = getN()
+  const combos = getAllCombinations(n)
   const conditions = {
     ...(chkX.checked ? { x: Math.max(0, parseInt(valX.value, 10) || 0) } : {}),
     ...(chkY.checked ? { y: Math.max(0, parseInt(valY.value, 10) || 0) } : {}),
@@ -133,10 +133,8 @@ function updateCond(n, combos) {
 }
 
 function update() {
-  const n = getN()
-  const combos = getAllCombinations(n) // 1回だけ取得して両方に渡す
-  renderAll(n, combos)
-  updateCond(n, combos)
+  renderAll()
+  updateCond()
 }
 
 nInput.addEventListener('input', update)

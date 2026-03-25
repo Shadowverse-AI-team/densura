@@ -6,7 +6,9 @@
       "Bash(npm install:*)",
       "Bash(npm test:*)",
       "Bash(npm run:*)",
-      "Bash(npx ecc-agentshield:*)"
+      "Bash(npx ecc-agentshield:*)",
+      "Bash(npx vitest:*)",
+      "Bash(git -C /c/Users/hp/Desktop/folder/programing/app/densura diff --name-only HEAD)"
     ]
   }
 }
