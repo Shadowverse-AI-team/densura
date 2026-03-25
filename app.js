@@ -20,6 +20,9 @@ const valX = document.getElementById('val-x')
 const valY = document.getElementById('val-y')
 const valZ = document.getElementById('val-z')
 
+// ソート状態: col = 'index'|'x'|'y'|'z'|'prob', dir = 1(昇順) | -1(降順)
+let sortState = { col: null, dir: 1 }
+
 // タブ切り替え
 document.querySelectorAll('.tab').forEach(tab => {
   tab.addEventListener('click', () => {
@@ -56,6 +59,24 @@ function makeEl(tag, { cls, text, style } = {}) {
   return el
 }
 
+// colKey でソートした combos（元のインデックス付き）を返す
+function sortedCombos(combos, n) {
+  const { col, dir } = sortState
+  if (!col) return combos.map((c, i) => ({ combo: c, index: i }))
+
+  return combos
+    .map((c, i) => ({ combo: c, index: i, prob: getCombinationProbability(n, ...c) }))
+    .sort((a, b) => {
+      let va, vb
+      if (col === 'index') { va = a.index; vb = b.index }
+      else if (col === 'x')    { va = a.combo[0]; vb = b.combo[0] }
+      else if (col === 'y')    { va = a.combo[1]; vb = b.combo[1] }
+      else if (col === 'z')    { va = a.combo[2]; vb = b.combo[2] }
+      else                     { va = a.prob;     vb = b.prob }
+      return (va - vb) * dir
+    })
+}
+
 function renderAll() {
   const n = getN()
   const combos = getAllCombinations(n)
@@ -75,16 +96,41 @@ function renderAll() {
   itemTotal.append(makeEl('span', { text: '総パターン数' }), makeEl('span', { text: `${total} 通り` }))
   summaryBox.append(itemN, itemTotal)
 
-  // table
+  // table headers with sort
+  const COLS = [
+    { label: '#',  key: 'index' },
+    { label: 'x',  key: 'x' },
+    { label: 'y',  key: 'y' },
+    { label: 'z',  key: 'z' },
+    { label: '確率', key: 'prob' },
+  ]
+
   const table = makeEl('table')
   const thead = makeEl('thead')
   const headerRow = makeEl('tr')
-  ;['#', 'x', 'y', 'z', '確率'].forEach(h => headerRow.append(makeEl('th', { text: h })))
+
+  COLS.forEach(({ label, key }) => {
+    const th = makeEl('th')
+    th.style.cursor = 'pointer'
+    th.style.userSelect = 'none'
+    const arrow = sortState.col === key ? (sortState.dir === 1 ? ' ▲' : ' ▼') : ''
+    th.textContent = label + arrow
+    th.addEventListener('click', () => {
+      if (sortState.col === key) {
+        sortState = { col: key, dir: sortState.dir * -1 }
+      } else {
+        sortState = { col: key, dir: 1 }
+      }
+      renderAll()
+    })
+    headerRow.append(th)
+  })
   thead.append(headerRow)
 
+  // sorted rows
   const tbody = makeEl('tbody')
-  combos.forEach(([x, y, z], i) => {
-    const prob = getCombinationProbability(n, x, y, z)
+  sortedCombos(combos, n).forEach(({ combo: [x, y, z], index, prob: cachedProb }) => {
+    const prob = cachedProb ?? getCombinationProbability(n, x, y, z)
     const barW = Math.max((prob / maxProb) * BAR_SCALE, 2)
     const tr = makeEl('tr')
     const probCell = makeEl('td')
@@ -92,7 +138,7 @@ function renderAll() {
       document.createTextNode(`${prob.toFixed(3)}%`),
       makeEl('span', { cls: 'prob-bar', style: { width: `${barW.toFixed(1)}px` } })
     )
-    ;[i + 1, x, y, z].forEach(v => tr.append(makeEl('td', { text: String(v) })))
+    ;[index + 1, x, y, z].forEach(v => tr.append(makeEl('td', { text: String(v) })))
     tr.append(probCell)
     tbody.append(tr)
   })
