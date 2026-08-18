@@ -3,6 +3,7 @@ import {
   getAllCombinations,
   getCombinationProbability,
   getConditionalProbability,
+  getMatchingCombinations,
 } from './calculator.js'
 
 const MAX_N = 100
@@ -13,12 +14,18 @@ const totalInfo = document.getElementById('total-info')
 const allResult = document.getElementById('all-result')
 const condResult = document.getElementById('cond-result')
 
-const chkX = document.getElementById('chk-x')
-const chkY = document.getElementById('chk-y')
-const chkZ = document.getElementById('chk-z')
-const valX = document.getElementById('val-x')
-const valY = document.getElementById('val-y')
-const valZ = document.getElementById('val-z')
+const VARS = ['x', 'y', 'z']
+
+// 各変数の下限/上限コントロール
+const condInputs = Object.fromEntries(
+  VARS.map(key => [
+    key,
+    {
+      min: { chk: document.getElementById(`chk-${key}-min`), val: document.getElementById(`min-${key}`) },
+      max: { chk: document.getElementById(`chk-${key}-max`), val: document.getElementById(`max-${key}`) },
+    },
+  ])
+)
 
 // ソート状態: col = 'index'|'x'|'y'|'z'|'prob', dir = 1(昇順) | -1(降順)
 let sortState = { col: null, dir: 1 }
@@ -38,12 +45,14 @@ document.querySelectorAll('.tab').forEach(tab => {
 })
 
 // チェックボックスで入力欄の有効/無効、変更のたびに即計算
-;[[chkX, valX], [chkY, valY], [chkZ, valZ]].forEach(([chk, val]) => {
-  chk.addEventListener('change', () => {
-    val.disabled = !chk.checked
-    updateCond()
+VARS.forEach(key => {
+  Object.values(condInputs[key]).forEach(({ chk, val }) => {
+    chk.addEventListener('change', () => {
+      val.disabled = !chk.checked
+      updateCond()
+    })
+    val.addEventListener('input', updateCond)
   })
-  val.addEventListener('input', updateCond)
 })
 
 function getN() {
@@ -150,32 +159,49 @@ function renderAll() {
   allResult.replaceChildren(summaryBox, tableWrapper)
 }
 
+// チェックされている側だけを取り出して { min?, max? } を作る（両方未チェックなら null）
+function readBounds(key) {
+  const { min, max } = condInputs[key]
+  const bounds = {}
+  if (min.chk.checked) bounds.min = Math.max(0, parseInt(min.val.value, 10) || 0)
+  if (max.chk.checked) bounds.max = Math.max(0, parseInt(max.val.value, 10) || 0)
+  return 'min' in bounds || 'max' in bounds ? bounds : null
+}
+
+function formatBounds(key, { min, max }) {
+  if (min !== undefined && max !== undefined) return `${min} ≤ ${key} ≤ ${max}`
+  if (min !== undefined) return `${key} ≥ ${min}`
+  return `${key} ≤ ${max}`
+}
+
 function updateCond() {
   const n = getN()
-  const combos = getAllCombinations(n)
-  const conditions = {
-    ...(chkX.checked ? { x: Math.max(0, parseInt(valX.value, 10) || 0) } : {}),
-    ...(chkY.checked ? { y: Math.max(0, parseInt(valY.value, 10) || 0) } : {}),
-    ...(chkZ.checked ? { z: Math.max(0, parseInt(valZ.value, 10) || 0) } : {}),
-  }
+  const conditions = Object.fromEntries(
+    VARS.map(key => [key, readBounds(key)]).filter(([, bounds]) => bounds !== null)
+  )
 
   const total = getTotalCombinations(n)
   const prob = getConditionalProbability(n, conditions)
-  const matchedCount = combos.filter(([x, y, z]) => {
-    if ('x' in conditions && x < conditions.x) return false
-    if ('y' in conditions && y < conditions.y) return false
-    if ('z' in conditions && z < conditions.z) return false
-    return true
-  }).length
+  const matchedCount = getMatchingCombinations(n, conditions).length
 
   const condText = Object.entries(conditions)
-    .map(([k, v]) => `${k} ≥ ${v}`)
+    .map(([key, bounds]) => formatBounds(key, bounds))
     .join('  かつ  ')
 
   const infoEl = makeEl('div', { cls: 'sub-info', text: condText || '条件なし（全パターン）' })
   const probEl = makeEl('div', { cls: 'big-prob', text: `${prob.toFixed(2)}%` })
   const countEl = makeEl('div', { cls: 'sub-info', text: `${matchedCount} / ${total} パターン` })
-  condResult.replaceChildren(infoEl, probEl, countEl)
+
+  const invalid = Object.entries(conditions).filter(
+    ([, { min, max }]) => min !== undefined && max !== undefined && min > max
+  )
+  const children = [infoEl, probEl, countEl]
+  if (invalid.length > 0) {
+    const keys = invalid.map(([key]) => key).join('・')
+    children.push(makeEl('div', { cls: 'warn-info', text: `${keys}: 下限が上限を上回っています` }))
+  }
+
+  condResult.replaceChildren(...children)
 }
 
 function update() {

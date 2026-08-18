@@ -43,17 +43,46 @@ export function getCombinationProbability(n, x, y, z) {
   return Math.exp(logProb) * 100
 }
 
-/**
- * conditions に指定した変数が閾値以上になる確率を % で返す（多項分布）
- * conditions 例: { x: 2, z: 1 } → x>=2 かつ z>=1
- * 指定なしの変数は制約なし (>=0)
- */
-export function getConditionalProbability(n, conditions) {
-  const minX = conditions.x ?? 0
-  const minY = conditions.y ?? 0
-  const minZ = conditions.z ?? 0
+const VARS = ['x', 'y', 'z']
 
-  return getAllCombinations(n)
-    .filter(([x, y, z]) => x >= minX && y >= minY && z >= minZ)
-    .reduce((sum, [x, y, z]) => sum + getCombinationProbability(n, x, y, z), 0)
+/**
+ * 条件指定を { min, max } に正規化する
+ * - undefined/null → 制約なし
+ * - number         → 下限のみ（後方互換: { x: 2 } は x>=2）
+ * - { min, max }   → 省略した側は制約なし
+ */
+function normalizeCondition(cond) {
+  if (cond === undefined || cond === null) return { min: 0, max: Infinity }
+  if (typeof cond === 'number') return { min: cond, max: Infinity }
+  return { min: cond.min ?? 0, max: cond.max ?? Infinity }
+}
+
+/**
+ * combo が conditions（AND 条件）をすべて満たすか判定する
+ * conditions 例: { x: { min: 2, max: 5 }, z: 1 } → 2<=x<=5 かつ z>=1
+ */
+export function matchesConditions([x, y, z], conditions = {}) {
+  const values = { x, y, z }
+  return VARS.every(key => {
+    const { min, max } = normalizeCondition(conditions[key])
+    return values[key] >= min && values[key] <= max
+  })
+}
+
+/**
+ * conditions を満たす (x,y,z) の配列を返す
+ */
+export function getMatchingCombinations(n, conditions = {}) {
+  return getAllCombinations(n).filter(combo => matchesConditions(combo, conditions))
+}
+
+/**
+ * conditions を満たす確率を % で返す（多項分布）
+ * 指定なしの変数は制約なし
+ */
+export function getConditionalProbability(n, conditions = {}) {
+  return getMatchingCombinations(n, conditions).reduce(
+    (sum, [x, y, z]) => sum + getCombinationProbability(n, x, y, z),
+    0
+  )
 }

@@ -32,15 +32,21 @@
 
     <!-- 条件付き確率タブ -->
     <section id="tab-cond" class="tab-content" role="tabpanel">
-      <p class="hint">確率を求めたい変数にチェックして閾値を入力してください（AND条件）</p>
+      <p class="hint">確率を求めたい変数にチェックして閾値を入力してください（すべて AND 条件）。以上・以下は両方チェックすると範囲指定になります。</p>
       <div class="cond-row">
-        <label><input type="checkbox" id="chk-x" /> x ≥ <input type="number" id="val-x" class="cond-val" min="0" value="0" disabled /></label>
+        <span class="cond-var">x</span>
+        <label class="cond-bound"><input type="checkbox" id="chk-x-min" /> ≥ <input type="number" id="min-x" class="cond-val" min="0" value="0" aria-label="x の下限" disabled /></label>
+        <label class="cond-bound"><input type="checkbox" id="chk-x-max" /> ≤ <input type="number" id="max-x" class="cond-val" min="0" value="0" aria-label="x の上限" disabled /></label>
       </div>
       <div class="cond-row">
-        <label><input type="checkbox" id="chk-y" /> y ≥ <input type="number" id="val-y" class="cond-val" min="0" value="0" disabled /></label>
+        <span class="cond-var">y</span>
+        <label class="cond-bound"><input type="checkbox" id="chk-y-min" /> ≥ <input type="number" id="min-y" class="cond-val" min="0" value="0" aria-label="y の下限" disabled /></label>
+        <label class="cond-bound"><input type="checkbox" id="chk-y-max" /> ≤ <input type="number" id="max-y" class="cond-val" min="0" value="0" aria-label="y の上限" disabled /></label>
       </div>
       <div class="cond-row">
-        <label><input type="checkbox" id="chk-z" /> z ≥ <input type="number" id="val-z" class="cond-val" min="0" value="0" disabled /></label>
+        <span class="cond-var">z</span>
+        <label class="cond-bound"><input type="checkbox" id="chk-z-min" /> ≥ <input type="number" id="min-z" class="cond-val" min="0" value="0" aria-label="z の下限" disabled /></label>
+        <label class="cond-bound"><input type="checkbox" id="chk-z-max" /> ≤ <input type="number" id="max-z" class="cond-val" min="0" value="0" aria-label="z の上限" disabled /></label>
       </div>
       <div id="cond-result" class="cond-result" aria-live="polite"></div>
     </section>

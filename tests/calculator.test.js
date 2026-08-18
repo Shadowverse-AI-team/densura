@@ -4,6 +4,8 @@ import {
   getAllCombinations,
   getCombinationProbability,
   getConditionalProbability,
+  getMatchingCombinations,
+  matchesConditions,
 } from '../calculator.js'
 
 // --- getTotalCombinations ---
@@ -107,5 +109,90 @@ describe('getConditionalProbability(n, conditions)', () => {
   })
   it('x≥0 かつ y≥0 かつ z≥0 → 100%', () => {
     expect(getConditionalProbability(6, { x: 0, y: 0, z: 0 })).toBeCloseTo(100, 3)
+  })
+})
+
+// --- matchesConditions (下限・上限の AND) ---
+describe('matchesConditions(combo, conditions)', () => {
+  it('条件なしなら常に true', () => {
+    expect(matchesConditions([1, 2, 3])).toBe(true)
+    expect(matchesConditions([1, 2, 3], {})).toBe(true)
+  })
+  it('数値指定は下限として扱う（後方互換）', () => {
+    expect(matchesConditions([2, 0, 0], { x: 2 })).toBe(true)
+    expect(matchesConditions([1, 1, 0], { x: 2 })).toBe(false)
+  })
+  it('max のみ指定 → 以下の判定', () => {
+    expect(matchesConditions([1, 1, 0], { x: { max: 1 } })).toBe(true)
+    expect(matchesConditions([2, 0, 0], { x: { max: 1 } })).toBe(false)
+  })
+  it('min と max の両方 → 範囲判定（境界を含む）', () => {
+    const cond = { x: { min: 1, max: 3 } }
+    expect(matchesConditions([0, 4, 0], cond)).toBe(false)
+    expect(matchesConditions([1, 3, 0], cond)).toBe(true)
+    expect(matchesConditions([3, 1, 0], cond)).toBe(true)
+    expect(matchesConditions([4, 0, 0], cond)).toBe(false)
+  })
+  it('複数変数は AND で結合される', () => {
+    const cond = { x: { min: 1 }, z: { max: 1 } }
+    expect(matchesConditions([1, 2, 1], cond)).toBe(true)
+    expect(matchesConditions([0, 2, 2], cond)).toBe(false)
+    expect(matchesConditions([1, 1, 2], cond)).toBe(false)
+  })
+  it('下限 > 上限 なら常に false', () => {
+    expect(matchesConditions([2, 0, 0], { x: { min: 3, max: 1 } })).toBe(false)
+  })
+})
+
+// --- getMatchingCombinations ---
+describe('getMatchingCombinations(n, conditions)', () => {
+  it('条件なしなら全パターン', () => {
+    expect(getMatchingCombinations(4)).toHaveLength(getTotalCombinations(4))
+  })
+  it('n=2, x≤1 → (2,0,0) 以外の 5 パターン', () => {
+    const result = getMatchingCombinations(2, { x: { max: 1 } })
+    expect(result).toHaveLength(5)
+    expect(result).not.toContainEqual([2, 0, 0])
+  })
+  it('n=4, 1≤x≤2 → x が 1 か 2 のパターンのみ', () => {
+    const result = getMatchingCombinations(4, { x: { min: 1, max: 2 } })
+    expect(result.every(([x]) => x >= 1 && x <= 2)).toBe(true)
+    expect(result).toHaveLength(4 + 3) // x=1 が 4 通り, x=2 が 3 通り
+  })
+  it('下限 > 上限 → 0 パターン', () => {
+    expect(getMatchingCombinations(5, { x: { min: 4, max: 2 } })).toHaveLength(0)
+  })
+})
+
+// --- getConditionalProbability: 上限・範囲指定 ---
+describe('getConditionalProbability: 以下・範囲条件', () => {
+  it('n=2, x≤1 → 88.89%（(2,0,0) の 1/9 を除いた分）', () => {
+    expect(getConditionalProbability(2, { x: { max: 1 } })).toBeCloseTo((8 / 9) * 100, 5)
+  })
+  it('n=4, 1≤x≤2 → 69.14%', () => {
+    // P(x=1)=32/81, P(x=2)=24/81
+    expect(getConditionalProbability(4, { x: { min: 1, max: 2 } })).toBeCloseTo((56 / 81) * 100, 5)
+  })
+  it('x≤n は制約なしと同じ 100%', () => {
+    expect(getConditionalProbability(6, { x: { max: 6 } })).toBeCloseTo(100, 5)
+  })
+  it('P(x≥k) と P(x≤k-1) の和が 100%', () => {
+    const a = getConditionalProbability(8, { x: { min: 3 } })
+    const b = getConditionalProbability(8, { x: { max: 2 } })
+    expect(a + b).toBeCloseTo(100, 5)
+  })
+  it('x と z の範囲を AND で組み合わせられる', () => {
+    // n=4, 1≤x≤2 かつ z≤1 → (1,2,1)(1,3,0)(2,1,1)(2,2,0)
+    const expected =
+      getCombinationProbability(4, 1, 2, 1) +
+      getCombinationProbability(4, 1, 3, 0) +
+      getCombinationProbability(4, 2, 1, 1) +
+      getCombinationProbability(4, 2, 2, 0)
+    expect(
+      getConditionalProbability(4, { x: { min: 1, max: 2 }, z: { max: 1 } })
+    ).toBeCloseTo(expected, 5)
+  })
+  it('下限 > 上限 → 0%', () => {
+    expect(getConditionalProbability(5, { x: { min: 4, max: 2 } })).toBeCloseTo(0, 5)
   })
 })
