@@ -189,9 +189,15 @@ tr:hover td { background: #fafafa; }
 .cond-bound {
   display: flex;
   align-items: center;
-  gap: 0.5rem;
-  cursor: pointer;
+  gap: 0.4rem;
   color: #1a1a1a;
+}
+
+.cond-bound label {
+  cursor: pointer;
+  user-select: none;
+  min-width: 1em;
+  text-align: center;
 }
 
 .cond-row input[type="checkbox"] {
@@ -212,8 +218,10 @@ tr:hover td { background: #fafafa; }
 
 .cond-val:focus { outline: 1px solid #1a1a1a; }
 
-.cond-val:disabled {
-  opacity: 0.35;
+/* 条件が無効（チェックなし）のときは薄く見せるが、入力は可能なままにする */
+.cond-val.inactive {
+  color: #9a9a9a;
+  border-color: #e5e5e5;
 }
 
 .cond-result {

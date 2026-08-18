@@ -32,21 +32,39 @@
 
     <!-- 条件付き確率タブ -->
     <section id="tab-cond" class="tab-content" role="tabpanel">
-      <p class="hint">確率を求めたい変数にチェックして閾値を入力してください（すべて AND 条件）。以上・以下は両方チェックすると範囲指定になります。</p>
+      <p class="hint">数値を入力するとその条件が有効になります（すべて AND 条件）。チェックを外すとその条件は無視されます。以上・以下の両方を使うと範囲指定になります。</p>
       <div class="cond-row">
         <span class="cond-var">x</span>
-        <label class="cond-bound"><input type="checkbox" id="chk-x-min" /> ≥ <input type="number" id="min-x" class="cond-val" min="0" value="0" aria-label="x の下限" disabled /></label>
-        <label class="cond-bound"><input type="checkbox" id="chk-x-max" /> ≤ <input type="number" id="max-x" class="cond-val" min="0" value="0" aria-label="x の上限" disabled /></label>
+        <span class="cond-bound">
+          <input type="checkbox" id="chk-x-min" /><label for="chk-x-min">≥</label>
+          <input type="number" id="min-x" class="cond-val" min="0" value="0" aria-label="x の下限" />
+        </span>
+        <span class="cond-bound">
+          <input type="checkbox" id="chk-x-max" /><label for="chk-x-max">≤</label>
+          <input type="number" id="max-x" class="cond-val" min="0" value="0" aria-label="x の上限" />
+        </span>
       </div>
       <div class="cond-row">
         <span class="cond-var">y</span>
-        <label class="cond-bound"><input type="checkbox" id="chk-y-min" /> ≥ <input type="number" id="min-y" class="cond-val" min="0" value="0" aria-label="y の下限" disabled /></label>
-        <label class="cond-bound"><input type="checkbox" id="chk-y-max" /> ≤ <input type="number" id="max-y" class="cond-val" min="0" value="0" aria-label="y の上限" disabled /></label>
+        <span class="cond-bound">
+          <input type="checkbox" id="chk-y-min" /><label for="chk-y-min">≥</label>
+          <input type="number" id="min-y" class="cond-val" min="0" value="0" aria-label="y の下限" />
+        </span>
+        <span class="cond-bound">
+          <input type="checkbox" id="chk-y-max" /><label for="chk-y-max">≤</label>
+          <input type="number" id="max-y" class="cond-val" min="0" value="0" aria-label="y の上限" />
+        </span>
       </div>
       <div class="cond-row">
         <span class="cond-var">z</span>
-        <label class="cond-bound"><input type="checkbox" id="chk-z-min" /> ≥ <input type="number" id="min-z" class="cond-val" min="0" value="0" aria-label="z の下限" disabled /></label>
-        <label class="cond-bound"><input type="checkbox" id="chk-z-max" /> ≤ <input type="number" id="max-z" class="cond-val" min="0" value="0" aria-label="z の上限" disabled /></label>
+        <span class="cond-bound">
+          <input type="checkbox" id="chk-z-min" /><label for="chk-z-min">≥</label>
+          <input type="number" id="min-z" class="cond-val" min="0" value="0" aria-label="z の下限" />
+        </span>
+        <span class="cond-bound">
+          <input type="checkbox" id="chk-z-max" /><label for="chk-z-max">≤</label>
+          <input type="number" id="max-z" class="cond-val" min="0" value="0" aria-label="z の上限" />
+        </span>
       </div>
       <div id="cond-result" class="cond-result" aria-live="polite"></div>
     </section>

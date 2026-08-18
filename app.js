@@ -44,14 +44,25 @@ document.querySelectorAll('.tab').forEach(tab => {
   })
 })
 
-// チェックボックスで入力欄の有効/無効、変更のたびに即計算
-VARS.forEach(key => {
-  Object.values(condInputs[key]).forEach(({ chk, val }) => {
-    chk.addEventListener('change', () => {
-      val.disabled = !chk.checked
-      updateCond()
-    })
-    val.addEventListener('input', updateCond)
+// 数値欄は常に編集可能。入力したらその条件を自動で有効化し、即計算する
+function eachBound(fn) {
+  VARS.forEach(key => Object.values(condInputs[key]).forEach(bound => fn(bound, key)))
+}
+
+// チェックが外れている条件はグレー表示にする（入力自体は妨げない）
+function syncBoundStyles() {
+  eachBound(({ chk, val }) => val.classList.toggle('inactive', !chk.checked))
+}
+
+eachBound(({ chk, val }) => {
+  chk.addEventListener('change', () => {
+    syncBoundStyles()
+    updateCond()
+  })
+  val.addEventListener('input', () => {
+    if (val.value !== '' && !chk.checked) chk.checked = true
+    syncBoundStyles()
+    updateCond()
   })
 })
 
@@ -206,6 +217,7 @@ function updateCond() {
 
 function update() {
   renderAll()
+  syncBoundStyles()
   updateCond()
 }
 
